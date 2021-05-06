@@ -18,7 +18,7 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 import matplotlib.pyplot as plt
 import os
-from utils import pre_process_mnist, pre_process_multimnist, pre_process_smallnorb
+from utils import pre_process_mnist, pre_process_multimnist, pre_process_smallnorb, pre_process_kmnist
 import json
 
 
@@ -74,6 +74,26 @@ class Dataset(object):
             self.X_test, self.y_test = pre_process_mnist.pre_process(self.X_test, self.y_test)
             self.class_names = list(range(10))
             print("[INFO] Dataset loaded!")
+
+        elif self.model_name == 'KMNIST':
+            (ds_train, ds_test), ds_info = tfds.load(
+                'kmnist',
+                split=['train', 'test'],
+                shuffle_files=True,
+                as_supervised=False,
+                with_info=True)
+            self.X_train, self.y_train = pre_process_kmnist.pre_process_train(ds_train)
+            self.X_test, self.y_test = pre_process_kmnist.pre_process_test(ds_test)
+
+            print(self.X_train.shape, self.X_test.shape)
+
+            # same pre processing as mnist
+            self.X_train, self.y_train = pre_process_mnist.pre_process_k(self.X_train, self.y_train)
+            self.X_test, self.y_test = pre_process_mnist.pre_process_k(self.X_test, self.y_test)
+            self.class_names = list(range(10))
+            print(self.X_train.shape, self.X_test.shape)
+            print("[INFO] Dataset loaded!")
+
         elif self.model_name == 'SMALLNORB':
                     # import the datatset
             (ds_train, ds_test), ds_info = tfds.load(
@@ -105,6 +125,8 @@ class Dataset(object):
 
     def get_tf_data(self):
         if self.model_name == 'MNIST':
+            dataset_train, dataset_test = pre_process_mnist.generate_tf_data(self.X_train, self.y_train, self.X_test, self.y_test, self.config['batch_size'])
+        elif self.model_name == 'KMNIST':
             dataset_train, dataset_test = pre_process_mnist.generate_tf_data(self.X_train, self.y_train, self.X_test, self.y_test, self.config['batch_size'])
         elif self.model_name == 'SMALLNORB':
             dataset_train, dataset_test = pre_process_smallnorb.generate_tf_data(self.X_train, self.y_train, self.X_test_patch, self.y_test, self.config['batch_size'])

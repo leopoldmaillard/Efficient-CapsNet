@@ -28,6 +28,9 @@ PARALLEL_INPUT_CALLS = 16
 def pre_process(image, label):
     return (image / 256)[...,None].astype('float32'), tf.keras.utils.to_categorical(label, num_classes=10)
 
+def pre_process_k(image, label):
+    return (image / 256).astype('float32'), tf.keras.utils.to_categorical(label, num_classes=10)
+
 def image_shift_rand(image, label):
     image = tf.reshape(image, [MNIST_IMG_SIZE, MNIST_IMG_SIZE])
     nonzero_x_cols = tf.cast(tf.where(tf.greater(
